@@ -54,9 +54,9 @@ chown postfix.sasl /etc/sasldb2
 ############
 # Enable TLS
 ############
-if [[ -n "$(find /etc/postfix/certs -iname *.crt)" && -n "$(find /etc/postfix/certs -iname *.key)" ]]; then
+if [[ -n "$(find /etc/postfix/certs -iname *.pem)" && -n "$(find /etc/postfix/certs -iname *.key)" ]]; then
   # /etc/postfix/main.cf
-  postconf -e smtpd_tls_cert_file=$(find /etc/postfix/certs -iname *.crt)
+  postconf -e smtpd_tls_cert_file=$(find /etc/postfix/certs -iname *.pem)
   postconf -e smtpd_tls_key_file=$(find /etc/postfix/certs -iname *.key)
   chmod 400 /etc/postfix/certs/*.*
   # /etc/postfix/master.cf
@@ -86,6 +86,7 @@ postconf -e milter_default_action=accept
 postconf -e smtpd_milters=inet:localhost:12301
 postconf -e non_smtpd_milters=inet:localhost:12301
 postconf -e smtp_tls_security_level=encrypt
+postconf -e smtp_tls_loglevel=1
 
 cat >> /etc/opendkim.conf <<EOF
 AutoRestart             Yes
