@@ -19,9 +19,12 @@ TLS and OpenDKIM support are optional.
 
 	```bash
 	$ sudo docker run -p 25:25 \
-			-e maildomain=mail.example.com -e smtp_user=user:pwd \
+			-e maildomain=mail.example.com \
+			-e smtp_user=user:pwd \
+			-e bounceaddress=bounce@example.com \
 			--name postfix -d catatnight/postfix
 	# Set multiple user credentials: -e smtp_user=user1:pwd1,user2:pwd2,...,userN:pwdN
+	# bounceaddress is optional: it is used to centralize bounce emails to a single
 	```
 2. Enable OpenDKIM: save your domain key ```.private``` in ```/path/to/domainkeys```
 

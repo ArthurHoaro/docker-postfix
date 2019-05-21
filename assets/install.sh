@@ -22,12 +22,36 @@ EOF
 ############
 cat >> /opt/postfix.sh <<EOF
 #!/bin/bash
-service postfix start
+service postfix restart
 tail -f /var/log/mail.log
 EOF
 chmod +x /opt/postfix.sh
 postconf -e myhostname=$maildomain
 postconf -F '*/*/chroot = n'
+
+############
+# Slow down Postfix for crappy French email providers
+# See: https://sqx-bki.fr/ralentir-le-debit-denvoi-postfix/
+############
+cat >> /etc/postfix/transport <<EOF
+orange.fr slow:
+wanadoo.fr slow:
+laposte.net slow:
+sfr.fr slow:
+free.net slow:
+EOF
+
+postmap /etc/postfix/transport
+
+echo "slow unix - - n - 5 smtp -o syslog_name=postfix-slow -o smtp_destination_concurrency_limit=1 -o slow_destination_rate_delay=10s" >> /etc/postfix/master.cf
+echo "transport_maps = hash:/etc/postfix/transport" >> /etc/postfix/main.cf
+echo "slow_destination_concurrency_limit = 1" >> /etc/postfix/main.cf
+echo "slow_destination_rate_delay = 10s" >> /etc/postfix/main.cf
+
+if [[ -v bounceaddress ]]; then
+  postconf -e notify_classes=bounce
+  postconf -e bounce_notice_recipient=$bounceaddress
+fi
 
 ############
 # SASL SUPPORT FOR CLIENTS
